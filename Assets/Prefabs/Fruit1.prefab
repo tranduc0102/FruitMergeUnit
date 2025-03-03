@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6386026757261902445}
   m_Layer: 0
   m_Name: Fruit1
-  m_TagString: Untagged
+  m_TagString: Fruit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -47,7 +47,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 1
-  m_Mass: 0.25
+  m_Mass: 28.274334
   m_LinearDrag: 0.4
   m_AngularDrag: 0.05
   m_GravityScale: 2

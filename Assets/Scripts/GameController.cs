@@ -1,9 +1,7 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using DG.Tweening;
 using Unity.Mathematics;
 using UnityEngine;
+using DG.Tweening;
 using Random = UnityEngine.Random;
 
 public class GameController : Singleton<GameController>
@@ -11,6 +9,8 @@ public class GameController : Singleton<GameController>
    [Space]
    [Header("Setup")]
    [SerializeField] private ModelFruit model;
+
+   [SerializeField] private UINextFruit _uiNextFruit;
 
    public ModelFruit Model
    {
@@ -26,10 +26,11 @@ public class GameController : Singleton<GameController>
    [Space]
    [Header("Time Spawn")]
    [SerializeField] private float timeSpawn;
-   [SerializeField] private float timer;
 
+   [Space] [Header("Game State")] 
+   [SerializeField] private bool isLose;
 
-   private const float POSITIONNOMOVE = 5f;
+   private const float POSITIONNOMOVE = 4.7f;
    private bool canSwipe;
    private bool isDelay;
 
@@ -57,6 +58,27 @@ public class GameController : Singleton<GameController>
                break;
          }
       }
+      
+      if (Input.GetMouseButtonDown(0))
+      {
+         OnDown();
+      }
+      if (Input.GetMouseButton(0))
+      {
+         OnMove();
+      }
+      if (Input.GetMouseButtonUp(0))
+      {
+         OnUp();
+      }
+   }
+   private void OnDown()
+   {
+      if (!isDelay)
+      {
+         canSwipe = true;
+         MoveObject(Input.mousePosition);
+      }
    }
 
    private void OnDown(Touch touch)
@@ -64,7 +86,14 @@ public class GameController : Singleton<GameController>
       if (!isDelay)
       {
          canSwipe = true;
-         MoveObject(touch);
+         MoveObject(touch.position);
+      }
+   }
+   private void OnMove()
+   {
+      if (canSwipe)
+      {
+         MoveObject(Input.mousePosition);
       }
    }
 
@@ -72,7 +101,7 @@ public class GameController : Singleton<GameController>
    {
       if (canSwipe)
       {
-        MoveObject(touch);
+        MoveObject(touch.position);
       }
    }
 
@@ -80,33 +109,35 @@ public class GameController : Singleton<GameController>
    {
       if(!canSwipe) return;
       _fruit.OnFall();
-      NextFruit();
       isDelay = true;
       canSwipe = false;
+      if(_fruit) _fruit.transform.SetParent(objPool);
+      _fruit = null;
       DOVirtual.DelayedCall(timeSpawn, delegate
       {
          SpawnFruit();
          isDelay = false;
       });
    }
-
-   private void MoveObject(Touch touch)
+   private void MoveObject(Vector3 position)
    {
-      Vector3 pos = Camera.main.ScreenToWorldPoint(touch.position);
+      Vector3 pos = Camera.main.ScreenToWorldPoint(position);
       if(pos.x > POSITIONNOMOVE || pos.x < -POSITIONNOMOVE) return;
       objectSpawn.transform.position = new Vector3(pos.x, objectSpawn.transform.position.y, 0f);
    }
    private void NextFruit()
    {
-      if(_fruit) _fruit.transform.SetParent(objPool);
-      _fruit = null;
       indexNextFruit = Random.Range(0, model.LimitFruit);
-      // UI next fruit
+      _uiNextFruit.SetNextFruit(model.DataFruit[indexNextFruit].GetComponentInChildren<SpriteRenderer>().sprite);
    }
    private void SpawnFruit()
    {
+      if(isLose) return;
       _fruit = PoolingManager.Spawn(model.DataFruit[indexNextFruit], objectSpawn.position, quaternion.identity, objectSpawn);
       _fruit.Init(indexNextFruit, MergeFruit, GameOver);
+      _fruit.transform.localScale = Vector3.zero;
+      _fruit.transform.DOScale(Vector3.one, 0.2f);
+      NextFruit();
    }
 
    private void MergeFruit(InfoFruit fruit1, InfoFruit fruit2, int level)
@@ -129,6 +160,6 @@ public class GameController : Singleton<GameController>
 
    private void GameOver()
    {
-      
+      isLose = true;
    }
 }

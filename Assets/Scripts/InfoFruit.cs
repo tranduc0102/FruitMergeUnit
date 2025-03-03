@@ -35,13 +35,39 @@ public class InfoFruit : MonoBehaviour
     {
         if (other.gameObject.TryGetComponent(out InfoFruit otherfruit))
         {
-            if(level > GameController.Instance.Model.DataFruit.Count) return;
+            if(level + 1 >= GameController.Instance.Model.DataFruit.Count) return;
             if (otherfruit.level == level)
             {
                 onMerge?.Invoke(this, otherfruit, level + 1);
                 isColider = true;
                 otherfruit.isColider = true;
             }
+        }
+    }
+
+    private Coroutine checkOver;
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Line"))
+        {
+            checkOver = StartCoroutine(CheckGameOver(1f, other));
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Line"))
+        {
+            StopCoroutine(checkOver);
+        }
+    }
+
+    IEnumerator CheckGameOver(float time, Collider2D collider2D)
+    {
+        yield return new WaitForSeconds(time);
+        if (collider2D != null && collider2D.bounds.Intersects(GetComponent<Collider2D>().bounds))
+        {
+            endGame?.Invoke();
         }
     }
 }
