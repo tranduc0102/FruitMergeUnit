@@ -11,11 +11,9 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
    {
       get
       {
-         // Thực hiện kiểm tra xem instance nó có null không
          if (instance == null)
          {
             instance = FindObjectOfType<T>(true);
-            // Kiểm tra tieeps nếu nó còn null 
             if (instance == null)
             {
                GameObject singleObject = new GameObject();

@@ -7,6 +7,11 @@ using UnityEngine;
 public class InfoFruit : MonoBehaviour
 {
     private int level;
+
+    public int Level
+    {
+        get => level;
+    }
     [SerializeField] private Rigidbody2D rb;
     private bool isColider;
 
